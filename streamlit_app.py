@@ -72,11 +72,58 @@ st.markdown("# 📈 한국 주식 일일 리포트")
 st.markdown("### Korean Stock Daily Report")
 st.markdown("---")
 
+# URL 파라미터 확인
+query_params = st.query_params
+
 # 세션 상태 초기화
 if 'scheduler' not in st.session_state:
     st.session_state.scheduler = DailyScheduler()
 if 'generating' not in st.session_state:
     st.session_state.generating = False
+
+# 리포트 페이지 처리
+if query_params.get('page') == 'report':
+    report_date = query_params.get('date')
+    if report_date:
+        st.markdown(f"# 📊 {report_date} 주식 리포트")
+        
+        # 뒤로 가기 버튼
+        if st.button("← 메인으로 돌아가기"):
+            st.query_params.clear()
+            st.rerun()
+        
+        # 리포트 파일 찾기
+        reports_dir = Path('reports')
+        report_file = None
+        
+        # 새 구조 확인
+        potential_file = reports_dir / f'daily_report_{report_date}.html'
+        if potential_file.exists():
+            report_file = potential_file
+        else:
+            # 기존 구조 확인
+            potential_file = reports_dir / report_date / f'daily_report_{report_date}.html'
+            if potential_file.exists():
+                report_file = potential_file
+        
+        if report_file:
+            with open(report_file, 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            
+            # HTML 내용을 더 크게 표시
+            st.components.v1.html(html_content, height=1200, scrolling=True)
+            
+            # 다운로드 버튼도 추가
+            st.download_button(
+                label="📥 HTML 다운로드",
+                data=html_content.encode('utf-8'),
+                file_name=f"stock_report_{report_date}.html",
+                mime="text/html"
+            )
+        else:
+            st.error(f"❌ {report_date} 리포트를 찾을 수 없습니다.")
+        
+        st.stop()  # 메인 페이지 로드 중단
 
 # 사이드바
 with st.sidebar:
@@ -227,10 +274,25 @@ with col1:
                     col_view, col_download = st.columns(2)
                     
                     with col_view:
-                        if st.button(f"👁️ 보기", key=f"view_{report['date']}"):
-                            with open(report['html_path'], 'r', encoding='utf-8') as f:
-                                html_content = f.read()
-                            st.components.v1.html(html_content, height=800, scrolling=True)
+                        # 링크 버튼으로 새 탭에서 열기
+                        report_url = f"?page=report&date={report['date']}"
+                        st.markdown(f"""
+                        <a href="{report_url}" target="_blank">
+                            <button style="
+                                background-color: #34c759;
+                                color: white;
+                                border: none;
+                                padding: 8px 16px;
+                                border-radius: 8px;
+                                cursor: pointer;
+                                font-size: 14px;
+                                text-decoration: none;
+                                display: inline-block;
+                                width: 100%;
+                                text-align: center;
+                            ">👁️ 보기</button>
+                        </a>
+                        """, unsafe_allow_html=True)
                     
                     with col_download:
                         with open(report['html_path'], 'rb') as f:
