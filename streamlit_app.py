@@ -128,12 +128,26 @@ with st.sidebar:
             st.session_state.generating = True
             with st.spinner(f"{selected_date} 리포트를 생성하고 있습니다..."):
                 try:
+                    # 생성 전 디렉토리 확인
+                    os.makedirs('reports', exist_ok=True)
+                    
                     st.session_state.scheduler.generate_daily_report_for_date(selected_datetime)
-                    st.success(f"✅ {selected_date} 리포트가 생성되었습니다!")
+                    
+                    # 생성 후 파일 확인
+                    reports_dir = Path('reports')
+                    generated_files = list(reports_dir.glob(f'daily_report_{selected_date}*'))
+                    
+                    if generated_files:
+                        st.success(f"✅ {selected_date} 리포트가 생성되었습니다!")
+                        st.info(f"생성된 파일: {[str(f) for f in generated_files]}")
+                    else:
+                        st.warning(f"⚠️ 리포트가 생성되었지만 파일을 찾을 수 없습니다.")
+                    
                     time.sleep(2)
                     st.rerun()
                 except Exception as e:
                     st.error(f"❌ 리포트 생성 실패: {str(e)}")
+                    st.error(f"상세 오류: {type(e).__name__}")
                 finally:
                     st.session_state.generating = False
     
@@ -158,12 +172,26 @@ col1, col2 = st.columns([2, 1])
 with col1:
     st.markdown("### 📋 생성된 리포트 목록")
     
-    # 리포트 목록 불러오기
+    # 리포트 목록 불러기 (새로운 방식)
     reports_dir = Path('reports')
     reports = []
     
+    # 디렉토리 구조를 새로 확인
     if reports_dir.exists():
-        for date_dir in sorted(reports_dir.iterdir(), reverse=True):
+        # 새로운 구조: reports/daily_report_YYYY-MM-DD.html
+        for html_file in reports_dir.glob('daily_report_*.html'):
+            date_str = html_file.stem.replace('daily_report_', '')
+            pdf_file = reports_dir / f'daily_report_{date_str}.pdf'
+            
+            reports.append({
+                'date': date_str,
+                'html_path': html_file,
+                'pdf_path': pdf_file if pdf_file.exists() else None,
+                'created_at': datetime.fromtimestamp(html_file.stat().st_mtime)
+            })
+        
+        # 기존 구조도 확인: reports/YYYY-MM-DD/daily_report_YYYY-MM-DD.html
+        for date_dir in reports_dir.iterdir():
             if date_dir.is_dir():
                 date_str = date_dir.name
                 html_file = date_dir / f'daily_report_{date_str}.html'
@@ -176,6 +204,15 @@ with col1:
                         'pdf_path': pdf_file if pdf_file.exists() else None,
                         'created_at': datetime.fromtimestamp(html_file.stat().st_mtime)
                     })
+    
+    # 중복 제거 및 정렬
+    seen_dates = set()
+    unique_reports = []
+    for report in sorted(reports, key=lambda x: x['created_at'], reverse=True):
+        if report['date'] not in seen_dates:
+            unique_reports.append(report)
+            seen_dates.add(report['date'])
+    reports = unique_reports
     
     if reports:
         for report in reports[:10]:  # 최근 10개만 표시
