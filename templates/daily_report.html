@@ -167,11 +167,80 @@
                 grid-template-columns: 1fr;
                 gap: 10px;
             }
+            
+            /* 모바일에서 테이블 최적화 */
             table {
-                font-size: 11px;
+                font-size: 10px;
             }
             table th, table td {
-                padding: 8px 4px;
+                padding: 6px 3px;
+                line-height: 1.2;
+            }
+            
+            /* 급등/급락 종목 테이블 특별 최적화 */
+            .surge-table, .plunge-table {
+                font-size: 9px;
+            }
+            .surge-table th, .surge-table td,
+            .plunge-table th, .plunge-table td {
+                padding: 4px 2px;
+                vertical-align: middle;
+            }
+            
+            /* 종목명 컬럼 너비 조정 */
+            .surge-table .stock-name, 
+            .plunge-table .stock-name {
+                max-width: 60px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                font-size: 9px;
+                font-weight: bold;
+            }
+            
+            /* 가격 정보 컴팩트하게 */
+            .surge-table .price, 
+            .plunge-table .price {
+                font-size: 9px;
+            }
+            
+            /* 거래량 더 작게 */
+            .surge-table .volume, 
+            .plunge-table .volume {
+                font-size: 8px;
+            }
+            
+            /* 변화율 컬럼 강조 */
+            .surge-table .change-rate, 
+            .plunge-table .change-rate {
+                font-weight: bold;
+                font-size: 10px;
+            }
+            
+            /* 테이블 행 높이 최소화 */
+            .surge-table tr, .plunge-table tr {
+                height: 28px;
+            }
+            
+            /* 헤더 높이도 줄이기 */
+            .surge-table th, .plunge-table th {
+                height: 32px;
+                font-size: 9px;
+                padding: 4px 2px;
+            }
+        }
+        
+        /* 아주 작은 화면 (iPhone SE 등) */
+        @media (max-width: 480px) {
+            .surge-table, .plunge-table {
+                font-size: 8px;
+            }
+            .surge-table th, .surge-table td,
+            .plunge-table th, .plunge-table td {
+                padding: 3px 1px;
+            }
+            .surge-table tr, .plunge-table tr {
+                height: 24px;
             }
         }
     </style>
@@ -264,7 +333,7 @@
         <!-- 급등 종목 -->
         <div class="section">
             <div class="section-title">급등 종목 (5% 이상 상승)</div>
-            <table>
+            <table class="surge-table">
                 <thead>
                     <tr>
                         <th>구분</th>
@@ -287,9 +356,9 @@
                         <td>{{ stock.sector }} / {{ stock.reason }}</td>
                         <td class="price">{{ stock.base_price | format_price }}</td>
                         <td class="price">{{ stock.current_price | format_price }}</td>
-                        <td class="positive">{{ stock.change_rate | format_change_rate }}</td>
+                        <td class="positive change-rate">{{ stock.change_rate | format_change_rate }}</td>
                         <td class="volume">{{ stock.volume | format_volume }}</td>
-                        <td class="positive">{{ stock.change_rate | format_change_rate }}</td>
+                        <td class="positive change-rate">{{ stock.change_rate | format_change_rate }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -299,7 +368,7 @@
         <!-- 급락 종목 -->
         <div class="section">
             <div class="section-title">급락 종목 (5% 이상 하락)</div>
-            <table>
+            <table class="plunge-table">
                 <thead>
                     <tr>
                         <th>구분</th>
@@ -322,9 +391,9 @@
                         <td>{{ stock.sector }} / {{ stock.reason }}</td>
                         <td class="price">{{ stock.base_price | format_price }}</td>
                         <td class="price">{{ stock.current_price | format_price }}</td>
-                        <td class="negative">{{ stock.change_rate | format_change_rate }}</td>
+                        <td class="negative change-rate">{{ stock.change_rate | format_change_rate }}</td>
                         <td class="volume">{{ stock.volume | format_volume }}</td>
-                        <td class="negative">{{ stock.change_rate | format_change_rate }}</td>
+                        <td class="negative change-rate">{{ stock.change_rate | format_change_rate }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
