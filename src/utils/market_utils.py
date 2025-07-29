@@ -12,8 +12,9 @@ def is_trading_day(date: datetime = None) -> bool:
     if date.weekday() >= 5:  # 토요일(5) 또는 일요일(6)
         return False
     
-    # 한국 공휴일 리스트 (2024년 기준, 필요시 업데이트)
+    # 한국 공휴일 리스트 (2024-2025년)
     holidays = [
+        # 2024년
         datetime(2024, 1, 1),   # 신정
         datetime(2024, 2, 9),   # 설날 연휴
         datetime(2024, 2, 10),  # 설날
@@ -29,6 +30,24 @@ def is_trading_day(date: datetime = None) -> bool:
         datetime(2024, 10, 3),  # 개천절
         datetime(2024, 10, 9),  # 한글날
         datetime(2024, 12, 25), # 크리스마스
+        
+        # 2025년
+        datetime(2025, 1, 1),   # 신정
+        datetime(2025, 1, 28),  # 설날 연휴
+        datetime(2025, 1, 29),  # 설날
+        datetime(2025, 1, 30),  # 설날 연휴
+        datetime(2025, 3, 1),   # 삼일절
+        datetime(2025, 5, 5),   # 어린이날
+        datetime(2025, 5, 12),  # 부처님오신날
+        datetime(2025, 6, 6),   # 현충일
+        datetime(2025, 8, 15),  # 광복절
+        datetime(2025, 10, 5),  # 추석 연휴
+        datetime(2025, 10, 6),  # 추석
+        datetime(2025, 10, 7),  # 추석 연휴
+        datetime(2025, 10, 8),  # 대체공휴일
+        datetime(2025, 10, 3),  # 개천절
+        datetime(2025, 10, 9),  # 한글날
+        datetime(2025, 12, 25), # 크리스마스
     ]
     
     date_only = date.date()
@@ -62,3 +81,27 @@ def calculate_change_rate(current: float, previous: float) -> float:
     if previous == 0:
         return 0
     return ((current - previous) / previous) * 100
+
+def is_market_closed(date: datetime = None) -> bool:
+    """장이 마감되었는지 확인 (16:15 이후만 리포트 생성 허용)"""
+    if date is None:
+        date = datetime.now(KST)
+    
+    # 거래일이 아니면 언제든 리포트 생성 가능
+    if not is_trading_day(date):
+        return True
+    
+    # 16:15 이후에만 오늘 리포트 생성 허용
+    market_close_time = date.replace(hour=16, minute=15, second=0, microsecond=0)
+    return date >= market_close_time
+
+def can_generate_today_report() -> bool:
+    """오늘 리포트를 생성할 수 있는지 확인"""
+    now = datetime.now(KST)
+    
+    # 거래일이 아니면 생성 불가
+    if not is_trading_day(now):
+        return False
+    
+    # 16:15 이후에만 생성 가능
+    return is_market_closed(now)

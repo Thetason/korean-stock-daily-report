@@ -15,7 +15,7 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from src.scheduler.daily_scheduler import DailyScheduler
-from src.utils.market_utils import KST, is_trading_day
+from src.utils.market_utils import KST, is_trading_day, can_generate_today_report, is_market_closed
 
 # 페이지 설정
 st.set_page_config(
@@ -214,8 +214,21 @@ if query_params.get('page') == 'report':
 with st.sidebar:
     st.markdown("### 🎯 빠른 실행")
     
-    # 오늘 리포트 생성 버튼
-    if st.button("📊 오늘 리포트 즉시 생성", type="primary", disabled=st.session_state.generating):
+    # 오늘 리포트 생성 버튼 (16:15 이후에만 활성화)
+    today_report_enabled = can_generate_today_report()
+    now = datetime.now(KST)
+    
+    if not today_report_enabled:
+        if is_trading_day(now):
+            st.warning("⏰ 오늘 리포트는 장 마감 후 16:15 이후에 생성할 수 있습니다.")
+        else:
+            st.info("📅 오늘은 거래일이 아닙니다.")
+    
+    if st.button(
+        "📊 오늘 리포트 즉시 생성", 
+        type="primary", 
+        disabled=st.session_state.generating or not today_report_enabled
+    ):
         st.session_state.generating = True
         with st.spinner("리포트를 생성하고 있습니다... (약 1-2분 소요)"):
             try:
@@ -265,15 +278,39 @@ with st.sidebar:
                     
                     st.session_state.scheduler.generate_daily_report_for_date(selected_datetime)
                     
-                    # 생성 후 파일 확인
+                    # 생성 후 파일 확인 (여러 경로에서 찾기)
                     reports_dir = Path('reports')
-                    generated_files = list(reports_dir.glob(f'daily_report_{selected_date}*'))
+                    generated_files = []
+                    
+                    # 1. 새 구조: reports/daily_report_YYYY-MM-DD.html
+                    new_format_file = reports_dir / f'daily_report_{selected_date}.html'
+                    if new_format_file.exists():
+                        generated_files.append(new_format_file)
+                    
+                    # 2. 기존 구조: reports/YYYY-MM-DD/daily_report_YYYY-MM-DD.html
+                    old_format_file = reports_dir / str(selected_date) / f'daily_report_{selected_date}.html'
+                    if old_format_file.exists():
+                        generated_files.append(old_format_file)
+                    
+                    # 3. 일반적인 검색
+                    pattern_files = list(reports_dir.glob(f'*{selected_date}*.html'))
+                    generated_files.extend(pattern_files)
+                    
+                    # 중복 제거
+                    generated_files = list(set(generated_files))
                     
                     if generated_files:
                         st.success(f"✅ {selected_date} 리포트가 생성되었습니다!")
-                        st.info(f"생성된 파일: {[str(f) for f in generated_files]}")
+                        # st.info(f"생성된 파일: {[str(f) for f in generated_files]}")  # 디버깅 메시지 제거
                     else:
-                        st.warning(f"⚠️ 리포트가 생성되었지만 파일을 찾을 수 없습니다.")
+                        # 좀 더 기다린 후 다시 확인
+                        import time
+                        time.sleep(1)
+                        generated_files = list(reports_dir.glob(f'*{selected_date}*.html'))
+                        if generated_files:
+                            st.success(f"✅ {selected_date} 리포트가 생성되었습니다!")
+                        else:
+                            st.warning(f"⚠️ 리포트 생성이 완료되었지만 파일 확인에 시간이 걸릴 수 있습니다. 잠시 후 새로고침해주세요.")
                     
                     time.sleep(2)
                     st.rerun()
@@ -422,7 +459,19 @@ with col2:
             config = json.load(f)
         
         st.success("✅ 시스템 정상 작동 중")
-        st.markdown(f"**자동 실행 시간:** {config.get('scheduler', {}).get('run_time', '16:00')}")
+        st.markdown(f"**자동 실행 시간:** {config.get('scheduler', {}).get('run_time', '16:15')}")
+        
+        # 현재 시간과 다음 실행 시간 표시
+        now = datetime.now(KST)
+        if is_trading_day(now) and not is_market_closed(now):
+            st.markdown("**장 상태:** 🟢 거래 중")
+            st.markdown("**다음 리포트:** 16:15 예정")
+        elif is_trading_day(now) and is_market_closed(now):
+            st.markdown("**장 상태:** 🔴 마감")
+            st.markdown("**오늘 리포트:** 생성 가능")
+        else:
+            st.markdown("**장 상태:** 📅 휴장일")
+        
         st.markdown(f"**급등 기준:** {config.get('analysis', {}).get('surge_threshold', 5)}%")
         st.markdown(f"**급락 기준:** {config.get('analysis', {}).get('plunge_threshold', -5)}%")
     else:
