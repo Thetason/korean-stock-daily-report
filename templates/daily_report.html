@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대박노트 데일리 메일 - {{ report_date }}</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #2c3e50;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin: 0;
+            font-weight: bold;
+        }
+        .header .date {
+            color: #7f8c8d;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .section-title {
+            background-color: #34495e;
+            color: white;
+            padding: 12px 20px;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .market-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .index-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .index-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .index-price {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .index-change {
+            font-size: 16px;
+        }
+        .positive { color: #e74c3c; }
+        .negative { color: #3498db; }
+        .neutral { color: #95a5a6; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background-color: white;
+        }
+        table th {
+            background-color: #34495e;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid #ecf0f1;
+            font-size: 12px;
+        }
+        table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        table tr:hover {
+            background-color: #e8f4f8;
+        }
+        .stock-name {
+            text-align: left !important;
+            font-weight: bold;
+        }
+        .price {
+            text-align: right !important;
+        }
+        .volume {
+            text-align: right !important;
+            font-size: 11px;
+        }
+        .analysis-text {
+            background-color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            line-height: 1.6;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        .theme-item {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .theme-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .theme-stocks {
+            color: #7f8c8d;
+            font-size: 13px;
+        }
+        .homework {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .homework h3 {
+            color: #856404;
+            margin-top: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #ecf0f1;
+            color: #7f8c8d;
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            .market-summary {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            table {
+                font-size: 11px;
+            }
+            table th, table td {
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>시 황 정 리</h1>
+            <div class="date">{{ report_date_korean }}</div>
+        </div>
+
+        <!-- 시장 개요 -->
+        <div class="section">
+            <div class="section-title">시장 개요</div>
+            <div class="market-summary">
+                <div class="index-card">
+                    <div class="index-name">KOSPI</div>
+                    <div class="index-price">{{ market_data.kospi.previous | format_price }} → {{ market_data.kospi.current | format_price }}</div>
+                    <div class="index-change {{ 'positive' if market_data.kospi.change_rate > 0 else 'negative' if market_data.kospi.change_rate < 0 else 'neutral' }}">
+                        {{ market_data.kospi.change_rate | format_change_rate }}
+                    </div>
+                </div>
+                <div class="index-card">
+                    <div class="index-name">KOSDAQ</div>
+                    <div class="index-price">{{ market_data.kosdaq.previous | format_price }} → {{ market_data.kosdaq.current | format_price }}</div>
+                    <div class="index-change {{ 'positive' if market_data.kosdaq.change_rate > 0 else 'negative' if market_data.kosdaq.change_rate < 0 else 'neutral' }}">
+                        {{ market_data.kosdaq.change_rate | format_change_rate }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 시간대별 분석 -->
+        <div class="section">
+            <div class="section-title">시간대별 분석</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>시간</th>
+                        <th>KOSPI(%)</th>
+                        <th>KOSDAQ(%)</th>
+                        <th>개인(억)</th>
+                        <th>외인(억)</th>
+                        <th>기관(억)</th>
+                        <th>금투(억)</th>
+                        <th>투신(억)</th>
+                        <th>연기금(억)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for time_slot in hourly_data %}
+                    <tr>
+                        <td><strong>{{ time_slot.time }}</strong></td>
+                        <td class="{{ 'positive' if time_slot.kospi_change > 0 else 'negative' if time_slot.kospi_change < 0 else 'neutral' }}">
+                            {{ time_slot.kospi_change | format_change_rate }}
+                        </td>
+                        <td class="{{ 'positive' if time_slot.kosdaq_change > 0 else 'negative' if time_slot.kosdaq_change < 0 else 'neutral' }}">
+                            {{ time_slot.kosdaq_change | format_change_rate }}
+                        </td>
+                        <td>{{ time_slot.individual or 0 }}</td>
+                        <td>{{ time_slot.foreign or 0 }}</td>
+                        <td>{{ time_slot.institution or 0 }}</td>
+                        <td>{{ time_slot.financial or 0 }}</td>
+                        <td>{{ time_slot.investment or 0 }}</td>
+                        <td>{{ time_slot.pension or 0 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 국내 지수 마감 분석 -->
+        <div class="section">
+            <div class="section-title">국내 지수 마감 분석</div>
+            <div class="analysis-text">
+                {{ market_analysis.summary }}
+            </div>
+        </div>
+
+        <!-- 오늘 시황 정리 -->
+        <div class="section">
+            <div class="section-title">오늘 시황 정리</div>
+            <div class="analysis-text">
+                {% for item in market_highlights %}
+                <p>• {{ item }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 급등 종목 -->
+        <div class="section">
+            <div class="section-title">급등 종목 (5% 이상 상승)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>종목코드</th>
+                        <th>종목명</th>
+                        <th>내용</th>
+                        <th>기준가</th>
+                        <th>현재가</th>
+                        <th>전일대비</th>
+                        <th>거래량</th>
+                        <th>급등률</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in surge_stocks %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ stock.ticker }}</td>
+                        <td class="stock-name">{{ stock.name }}</td>
+                        <td>{{ stock.sector }} / {{ stock.reason }}</td>
+                        <td class="price">{{ stock.base_price | format_price }}</td>
+                        <td class="price">{{ stock.current_price | format_price }}</td>
+                        <td class="positive">{{ stock.change_rate | format_change_rate }}</td>
+                        <td class="volume">{{ stock.volume | format_volume }}</td>
+                        <td class="positive">{{ stock.change_rate | format_change_rate }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 급락 종목 -->
+        <div class="section">
+            <div class="section-title">급락 종목 (5% 이상 하락)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>종목코드</th>
+                        <th>종목명</th>
+                        <th>내용</th>
+                        <th>기준가</th>
+                        <th>현재가</th>
+                        <th>전일대비</th>
+                        <th>거래량</th>
+                        <th>급락률</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in plunge_stocks %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ stock.ticker }}</td>
+                        <td class="stock-name">{{ stock.name }}</td>
+                        <td>{{ stock.sector }} / {{ stock.reason }}</td>
+                        <td class="price">{{ stock.base_price | format_price }}</td>
+                        <td class="price">{{ stock.current_price | format_price }}</td>
+                        <td class="negative">{{ stock.change_rate | format_change_rate }}</td>
+                        <td class="volume">{{ stock.volume | format_volume }}</td>
+                        <td class="negative">{{ stock.change_rate | format_change_rate }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 오늘의 테마 -->
+        <div class="section">
+            <div class="section-title">오늘의 테마</div>
+            {% if themes %}
+                {% for theme in themes %}
+                <div class="theme-item">
+                    <div class="theme-title">{{ theme.theme }} ({{ theme.stock_count }}개 종목, 평균 {{ theme.avg_change_rate | format_change_rate }})</div>
+                    <div class="theme-stocks">
+                        대표종목: 
+                        {% for stock in theme.representative_stocks %}
+                        {{ stock.name }}({{ stock.change_rate | format_change_rate }}){% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="analysis-text">오늘 특별한 테마는 없습니다.</div>
+            {% endif %}
+        </div>
+
+        <!-- 숙제 -->
+        <div class="section">
+            <div class="section-title">숙제</div>
+            {% if homework %}
+                <div class="homework">
+                    <h3>내일 주목할 사항</h3>
+                    {% for item in homework %}
+                    <p>• {{ item }}</p>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="analysis-text">숙제는 없습니다.</div>
+            {% endif %}
+        </div>
+
+        <div class="footer">
+            <p>본 보고서는 공개된 시장 데이터를 기반으로 자동 생성되었습니다.</p>
+            <p>투자 판단의 참고용으로만 활용하시기 바랍니다.</p>
+            <p>생성일시: {{ generation_time }}</p>
+        </div>
+    </div>
+</body>
+</html>

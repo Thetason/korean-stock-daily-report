@@ -1,0 +1,31 @@
+{
+    "market": {
+        "kospi_ticker": "^KS11",
+        "kosdaq_ticker": "^KQ11",
+        "trading_hours": {
+            "start": "09:00",
+            "end": "15:30",
+            "intervals": ["09:30", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "15:30"]
+        }
+    },
+    "thresholds": {
+        "surge_rate": 5.0,
+        "plunge_rate": -5.0,
+        "volume_surge_multiplier": 3.0
+    },
+    "report": {
+        "output_dir": "reports",
+        "template_dir": "templates",
+        "max_surge_stocks": 50,
+        "max_plunge_stocks": 30
+    },
+    "email": {
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "recipients": []
+    },
+    "scheduler": {
+        "run_time": "16:00",
+        "timezone": "Asia/Seoul"
+    }
+}

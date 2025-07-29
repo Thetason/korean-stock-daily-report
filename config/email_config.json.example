@@ -1,0 +1,13 @@
+{
+    "email": {
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "sender_email": "your-email@gmail.com",
+        "sender_password": "your-app-password",
+        "recipients": [
+            "recipient1@email.com",
+            "recipient2@email.com"
+        ]
+    },
+    "note": "Gmail 사용 시 앱 비밀번호를 사용해야 합니다. 구글 계정 > 보안 > 앱 비밀번호에서 생성하세요."
+}
