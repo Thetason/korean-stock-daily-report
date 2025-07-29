@@ -22,47 +22,132 @@ st.set_page_config(
     page_title="한국 주식 일일 리포트",
     page_icon="📈",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
-# CSS 스타일
+# CSS 스타일 (모바일 최적화)
 st.markdown("""
 <style>
     .main {
-        padding-top: 2rem;
+        padding-top: 1rem;
     }
+    
+    /* 버튼 스타일 */
     .stButton>button {
         width: 100%;
         background-color: #4CAF50;
         color: white;
         font-weight: bold;
-        padding: 0.5rem 1rem;
+        padding: 0.75rem 1rem;
         border-radius: 0.5rem;
         border: none;
         margin: 0.5rem 0;
+        font-size: 16px;
     }
     .stButton>button:hover {
         background-color: #45a049;
     }
-    .report-card {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 0.5rem;
-        margin: 1rem 0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
+    
+    /* 제목 크기 조정 */
     h1 {
         color: #2c3e50;
         text-align: center;
-        padding-bottom: 2rem;
+        padding-bottom: 1rem;
+        font-size: 2rem;
     }
-    .success-message {
+    
+    h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* 리포트 카드 스타일 */
+    .report-item {
+        background-color: #f8f9fa;
         padding: 1rem;
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        border-radius: 0.5rem;
-        color: #155724;
-        margin: 1rem 0;
+        border-radius: 0.75rem;
+        margin: 0.75rem 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-left: 4px solid #4CAF50;
+    }
+    
+    .report-date {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+    
+    .report-time {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* 모바일 전용 스타일 */
+    @media (max-width: 768px) {
+        .main {
+            padding: 0.5rem;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.1rem;
+        }
+        
+        /* 사이드바를 모바일에서 축소 */
+        .css-1d391kg {
+            padding-top: 1rem;
+        }
+        
+        /* 버튼 크기 모바일 최적화 */
+        .stButton>button {
+            padding: 0.6rem 0.8rem;
+            font-size: 14px;
+        }
+        
+        /* 리포트 아이템 모바일 최적화 */
+        .report-item {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+        }
+        
+        .report-date {
+            font-size: 1rem;
+        }
+        
+        .report-time {
+            font-size: 0.8rem;
+        }
+        
+        /* 열 간격 줄이기 */
+        .row-widget {
+            gap: 0.5rem;
+        }
+    }
+    
+    /* 아주 작은 화면 (iPhone SE 등) */
+    @media (max-width: 480px) {
+        .main {
+            padding: 0.25rem;
+        }
+        
+        h1 {
+            font-size: 1.3rem;
+        }
+        
+        .report-item {
+            padding: 0.5rem;
+        }
+        
+        .stButton>button {
+            padding: 0.5rem;
+            font-size: 13px;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -213,8 +298,8 @@ with st.sidebar:
     - 주요 뉴스
     """)
 
-# 메인 컨텐츠
-col1, col2 = st.columns([2, 1])
+# 메인 컨텐츠 (모바일에서는 1:1 비율로)
+col1, col2 = st.columns([3, 1])
 
 with col1:
     st.markdown("### 📋 생성된 리포트 목록")
@@ -262,48 +347,54 @@ with col1:
     reports = unique_reports
     
     if reports:
-        for report in reports[:10]:  # 최근 10개만 표시
-            with st.container():
-                col_date, col_actions = st.columns([3, 2])
-                
-                with col_date:
-                    st.markdown(f"### 📅 {report['date']}")
-                    st.caption(f"생성 시간: {report['created_at'].strftime('%Y-%m-%d %H:%M:%S')}")
-                
-                with col_actions:
-                    col_view, col_download = st.columns(2)
-                    
-                    with col_view:
-                        # 링크 버튼으로 새 탭에서 열기
-                        report_url = f"?page=report&date={report['date']}"
-                        st.markdown(f"""
-                        <a href="{report_url}" target="_blank">
-                            <button style="
-                                background-color: #34c759;
-                                color: white;
-                                border: none;
-                                padding: 8px 16px;
-                                border-radius: 8px;
-                                cursor: pointer;
-                                font-size: 14px;
-                                text-decoration: none;
-                                display: inline-block;
-                                width: 100%;
-                                text-align: center;
-                            ">👁️ 보기</button>
-                        </a>
-                        """, unsafe_allow_html=True)
-                    
-                    with col_download:
-                        with open(report['html_path'], 'rb') as f:
-                            st.download_button(
-                                label="📥 다운로드",
-                                data=f.read(),
-                                file_name=f"stock_report_{report['date']}.html",
-                                mime="text/html",
-                                key=f"download_{report['date']}"
-                            )
-                
+        for i, report in enumerate(reports[:10]):  # 최근 10개만 표시
+            # 모바일 최적화된 카드 형태
+            st.markdown(f"""
+            <div class="report-item">
+                <div class="report-date">📅 {report['date']}</div>
+                <div class="report-time">생성: {report['created_at'].strftime('%m/%d %H:%M')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # 모바일 친화적 버튼 배치 (항상 세로 배치)
+            report_url = f"?page=report&date={report['date']}"
+            
+            # 큰 보기 버튼
+            st.markdown(f"""
+            <div style="margin-bottom: 10px;">
+                <a href="{report_url}" target="_blank" style="text-decoration: none;">
+                    <button style="
+                        background: linear-gradient(135deg, #34c759, #28a745);
+                        color: white;
+                        border: none;
+                        padding: 14px 20px;
+                        border-radius: 12px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        width: 100%;
+                        font-weight: bold;
+                        box-shadow: 0 3px 10px rgba(52, 199, 89, 0.3);
+                        transition: all 0.3s ease;
+                    " onmouseover="this.style.transform='translateY(-2px)'" 
+                       onmouseout="this.style.transform='translateY(0)'">
+                        👁️ 리포트 보기
+                    </button>
+                </a>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # 다운로드 버튼
+            with open(report['html_path'], 'rb') as f:
+                st.download_button(
+                    label="📥 HTML 다운로드",
+                    data=f.read(),
+                    file_name=f"stock_report_{report['date']}.html",
+                    mime="text/html",
+                    key=f"download_{report['date']}",
+                    use_container_width=True
+                )
+            
+            if i < len(reports) - 1:  # 마지막이 아니면 구분선
                 st.markdown("---")
     else:
         st.info("📭 아직 생성된 리포트가 없습니다. 위의 버튼을 눌러 리포트를 생성해주세요!")
