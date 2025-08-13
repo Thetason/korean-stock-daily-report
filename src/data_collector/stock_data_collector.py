@@ -28,12 +28,12 @@ class StockDataCollector:
         
         try:
             # KOSPI 데이터
-            kospi_data = stock.get_index_ohlcv_by_date(date_str, date_str, "1001")
-            kospi_prev = stock.get_index_ohlcv_by_date(previous_date_str, previous_date_str, "1001")
+            kospi_data = stock.get_index_ohlcv(date_str, date_str, "1001")
+            kospi_prev = stock.get_index_ohlcv(previous_date_str, previous_date_str, "1001")
             
             # KOSDAQ 데이터  
-            kosdaq_data = stock.get_index_ohlcv_by_date(date_str, date_str, "2001")
-            kosdaq_prev = stock.get_index_ohlcv_by_date(previous_date_str, previous_date_str, "2001")
+            kosdaq_data = stock.get_index_ohlcv(date_str, date_str, "2001")
+            kosdaq_prev = stock.get_index_ohlcv(previous_date_str, previous_date_str, "2001")
             
             result = {
                 'date': date.strftime('%Y-%m-%d'),
@@ -134,9 +134,9 @@ class StockDataCollector:
         
         try:
             # 당일 주가 데이터
-            current_data = stock.get_market_ohlcv_by_ticker(date_str, market="ALL")
+            current_data = stock.get_market_ohlcv(date_str, market="ALL")
             # 전일 주가 데이터
-            previous_data = stock.get_market_ohlcv_by_ticker(previous_date_str, market="ALL")
+            previous_data = stock.get_market_ohlcv(previous_date_str, market="ALL")
             
             # 종목명 정보
             stock_names = {}
