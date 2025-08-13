@@ -181,8 +181,15 @@ if query_params.get('page') == 'report':
         reports_dir = Path('reports')
         report_file = None
         
-        # 새 구조 확인
-        potential_file = reports_dir / f'daily_report_{report_date}.html'
+        # report_date를 YYYYMMDD 형식으로 변환
+        date_parts = report_date.split('-')
+        if len(date_parts) == 3:
+            report_date_raw = ''.join(date_parts)
+        else:
+            report_date_raw = report_date
+        
+        # 새 구조 확인 (YYYYMMDD 형식)
+        potential_file = reports_dir / f'daily_report_{report_date_raw}.html'
         if potential_file.exists():
             report_file = potential_file
         else:
@@ -347,10 +354,15 @@ with col1:
     
     # 디렉토리 구조를 새로 확인
     if reports_dir.exists():
-        # 새로운 구조: reports/daily_report_YYYY-MM-DD.html
+        # 새로운 구조: reports/daily_report_YYYYMMDD.html
         for html_file in reports_dir.glob('daily_report_*.html'):
-            date_str = html_file.stem.replace('daily_report_', '')
-            pdf_file = reports_dir / f'daily_report_{date_str}.pdf'
+            date_str_raw = html_file.stem.replace('daily_report_', '')
+            # YYYYMMDD를 YYYY-MM-DD로 변환
+            if len(date_str_raw) == 8 and date_str_raw.isdigit():
+                date_str = f"{date_str_raw[:4]}-{date_str_raw[4:6]}-{date_str_raw[6:8]}"
+            else:
+                date_str = date_str_raw
+            pdf_file = reports_dir / f'daily_report_{date_str_raw}.pdf'
             
             reports.append({
                 'date': date_str,
