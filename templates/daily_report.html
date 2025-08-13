@@ -159,22 +159,50 @@
             font-size: 12px;
         }
         @media (max-width: 768px) {
+            body {
+                padding: 5px;
+                font-size: 12px;
+            }
             .container {
-                padding: 15px;
-                margin: 10px;
+                padding: 10px;
+                margin: 5px;
+                max-width: 100%;
+            }
+            .header h1 {
+                font-size: 20px;
+            }
+            .section-title {
+                font-size: 14px;
+                padding: 8px 15px;
             }
             .market-summary {
                 grid-template-columns: 1fr;
                 gap: 10px;
             }
+            .index-card {
+                padding: 15px;
+            }
+            .index-name {
+                font-size: 16px;
+            }
+            .index-price {
+                font-size: 18px;
+            }
+            .index-change {
+                font-size: 14px;
+            }
             
             /* 모바일에서 테이블 최적화 */
             table {
-                font-size: 10px;
+                font-size: 9px;
+                width: 100%;
+                table-layout: fixed;
             }
             table th, table td {
-                padding: 6px 3px;
-                line-height: 1.2;
+                padding: 4px 2px;
+                line-height: 1.1;
+                word-wrap: break-word;
+                overflow: hidden;
             }
             
             /* 급등/급락 종목 테이블 특별 최적화 */
@@ -232,15 +260,54 @@
         
         /* 아주 작은 화면 (iPhone SE 등) */
         @media (max-width: 480px) {
-            .surge-table, .plunge-table {
+            body {
+                padding: 2px;
+                font-size: 10px;
+            }
+            .container {
+                padding: 5px;
+                margin: 2px;
+            }
+            .header h1 {
+                font-size: 16px;
+            }
+            .section-title {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+            .index-card {
+                padding: 10px;
+            }
+            .index-name {
+                font-size: 14px;
+            }
+            .index-price {
+                font-size: 16px;
+            }
+            
+            table {
                 font-size: 8px;
+            }
+            table th, table td {
+                padding: 2px 1px;
+                font-size: 7px;
+            }
+            
+            .surge-table, .plunge-table {
+                font-size: 7px;
             }
             .surge-table th, .surge-table td,
             .plunge-table th, .plunge-table td {
-                padding: 3px 1px;
+                padding: 2px 1px;
+                font-size: 6px;
             }
             .surge-table tr, .plunge-table tr {
-                height: 24px;
+                height: 20px;
+            }
+            .surge-table .stock-name, 
+            .plunge-table .stock-name {
+                max-width: 40px;
+                font-size: 7px;
             }
         }
     </style>
