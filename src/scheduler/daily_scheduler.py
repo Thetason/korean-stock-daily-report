@@ -131,7 +131,6 @@ class DailyScheduler:
             
             # 데이터 병합
             if all_stock_data:
-                import pandas as pd
                 data['stock_data'] = pd.concat(all_stock_data, ignore_index=True)
             else:
                 data['stock_data'] = pd.DataFrame()
