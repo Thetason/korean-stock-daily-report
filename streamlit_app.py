@@ -202,8 +202,34 @@ if query_params.get('page') == 'report':
             with open(report_file, 'r', encoding='utf-8') as f:
                 html_content = f.read()
             
-            # HTML 내용을 더 크게 표시
-            st.components.v1.html(html_content, height=1200, scrolling=True)
+            # viewport height를 사용하여 전체 화면 높이로 설정
+            # HTML에 스타일 추가하여 모바일 최적화
+            responsive_html = f"""
+            <div style="width: 100%; overflow-x: auto;">
+                {html_content}
+            </div>
+            <style>
+                @media (max-width: 768px) {{
+                    body {{ 
+                        font-size: 14px !important;
+                        padding: 10px !important;
+                    }}
+                    .container {{
+                        padding: 15px !important;
+                        max-width: 100% !important;
+                    }}
+                    table {{
+                        font-size: 11px !important;
+                    }}
+                    .section-title {{
+                        font-size: 16px !important;
+                    }}
+                }}
+            </style>
+            """
+            
+            # HTML 내용을 전체 화면으로 표시
+            st.components.v1.html(responsive_html, height=2500, scrolling=True)
             
             # 다운로드 버튼도 추가
             st.download_button(
